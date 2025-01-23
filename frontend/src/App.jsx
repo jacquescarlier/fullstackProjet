@@ -1,10 +1,10 @@
-import Routing from "./containers/router/Routing";
+import Router from "./containers/router/Routing";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
- 
-    
-      <Routing />
-   
-);
-
+function App() {
+  return (
+    <>
+      <Router />
+    </>
+  );
+}
+export default App;
