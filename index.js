@@ -1,14 +1,13 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import express from "express";
 import dotenv from "dotenv";
-
 const app = express();
 const port = 3000;
 
+app.use(express.json());
 dotenv.config();
 const uri = process.env.STRING_URI;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -21,7 +20,6 @@ let db;
 
 async function connectToDb() {
   try {
-    // Connect the client to the server
     await client.connect();
     db = client.db("employeeDatabase");
     console.log("Successfully connected to MongoDB!");
@@ -33,12 +31,10 @@ async function connectToDb() {
 app.get("/", async (req, res) => {
   try {
     if (!db) {
-      res.status(500).send("Database not connected");
-      return;
+      return res.status(500).send("Database not connected");
     }
     const posts = await db.collection("Name").find().toArray();
-    console.log(posts);
-    res.send(posts);
+    res.json(posts);
   } catch (err) {
     console.error("Error fetching posts:", err);
     res.status(500).send("Error fetching posts");
@@ -46,31 +42,29 @@ app.get("/", async (req, res) => {
 });
 
 // Add data to server ("/insert")
-app.get("/insert", async (req, res) => {
+app.post("/insert", async (req, res) => {
   try {
     if (!db) {
-      res.status(500).send("Database not connected");
-      return;
+      return res.status(500).send("Database not connected");
     }
 
-    // Sample data to insert. Modify this as needed.
-    const newData = {
-      surname: "Doe",
-      firstnamen: "John",
-      birthday: "2024-02-28",
+    // You can directly use newData here if you don't want to rely on req.body
+    const newData = { 
+      surname: "Don",
+      firstName: "Jose", 
+      birthday: "2024-02-28" 
     };
 
-    const result = await db.collection("Name").insertOne(newData);
+    const result = await db.collection("Name").insertOne(req.body || newData);
     console.log("New post inserted:", result);
-    res.status(200).send(result);
+    res.json(result);
   } catch (err) {
     console.error("Error inserting post:", err);
     res.status(500).send("Error inserting post");
   }
 });
 
-// Start server and connect to database
 app.listen(port, async () => {
-  await connectToDb(); // Connect to the database before starting the server
+  await connectToDb();
   console.log(`Server is listening on port ${port}`);
 });
